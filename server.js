@@ -52,32 +52,67 @@ finish (content, object, response) { pt object into content and delive}
 // Serve a request by delivering a file.
 function handle(request, response) {
     var url = request.url.toLowerCase();
-    console.log(url);
+    console.log("handle: "+url);
     if (url.endsWith("/")) url = url + "index.html";
-    console.log(url);
+    console.log("handle2: "+url);
+    var type = validate(url, response);
+
     if(url.startsWith("/item")) {
-      var file = "./public" + url;
-      return special(response, file);
+        var file = "./public" + url;
+        var pieces = file.split("?id=");
+        var searchId = pieces[1];
+        file = pieces[0];
+        console.log("File: "+file);
+        var type = validate(file, response);
+        return special(response, file, searchId, type);
     }
-    if (isBanned(url)) return fail(response, NotFound, "URL has been banned");
-    var type = findType(url);
-    if (type == null) return fail(response, BadType, "File type unsupported");
+
     var file = "./public" + url;
     fs.readFile(file, ready);
     function ready(err, content) { deliver(response, type, err, content); }
 }
 
-  function special(response, file) {
-    console.log(file);
+// Validates the url.
+function validate(url, response) {
+    if (isBanned(url)) return fail(response, NotFound, "URL has been banned");
+    var type = findType(url);
+    if (type === null) return fail(response, BadType, "File type unsupported");
+    return type;
+}
+
+// readFile and runs getData to return page with queried data.
+function special(response, file, searchId, type) {
+    // console.log(file);
+    // console.log(searchId);
     fs.readFile(file, ready);
-    function ready(err, content) { getData(content, response); }
+    function ready(fileErr, content) { getData(content, response, searchId, type, fileErr); }
+}
+
+// Prepares statement, runs query.
+function getData(content, response, searchId, type, fileErr) {
+    var STMT = db.prepare("select * from Item where Item.id = ? ");
+    console.log("getData: "+searchId);
+
+    STMT.get(searchId, ready);
+    function ready(err, object) { finish(content, object, response, type, fileErr); }
+    STMT.finalize();
   }
 
-  function getData(content, response) {
-    var STMT = db.prepare("select * from Item where Item.id = ? ");
-    STMT.run(item, show);
-    // STMT.finalize();
-  }
+// Delivers Item page by splitting content and adding object data.
+function finish(content, object, response, type, fileErr) {
+    var id = object.id;
+    var title = object.title;
+    var description = object.description;
+    console.log(object);
+    console.log("id: "+id);
+    console.log("title: "+title);
+    console.log("description: "+description);
+    var c = content+"";
+    var pieces = c.split("$");
+    var s = pieces[0]+object.id+pieces[1]+object.title+pieces[2]+object.description+pieces[3];
+    console.log(s);
+    deliver(response, type, fileErr, s);
+}
 
 // Forbid any resources which shouldn't be delivered to the browser.
 function isBanned(url) {

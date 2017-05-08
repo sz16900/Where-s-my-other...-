@@ -12,10 +12,12 @@ CREATE TABLE Item (
   personId INTEGER,
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title VARCHAR(255) NOT NULL,
-  -- picture
   description TEXT NOT NULL,
   CONSTRAINT personIdConstraint FOREIGN KEY (personId) REFERENCES Person(id)
 );
 
-DESCRIBE Person;
-DESCRIBE Item;
+INSERT INTO Person (name, email) VALUES ("rob", "rr@gmail.com");
+INSERT INTO Person (name, email) VALUES ("seth", "sz@gmail.com");
+
+INSERT INTO Item (personId, title, description) VALUES ("1", "Shoe", "A blue nike shoe, left, size 9");
+INSERT INTO Item (personId, title, description) VALUES ("2", "Mitten", "A red mitten for the right hand");
