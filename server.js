@@ -16,6 +16,8 @@
 
 var http = require("http");
 var fs = require("fs");
+var sql = require("sqlite3");
+var db = new sql.Database("data.db");
 var OK = 200, NotFound = 404, BadType = 415, Error = 500;
 var types, banned;
 start(8080);
@@ -32,10 +34,31 @@ function start(port) {
     console.log("Server running at", address);
 }
 
+/*
+handles (request, response) { if(url.startswith("item") ) return special(...)}
+special () {fs.readfile("item.html", getData)   "have  a function inside called ready
+  ready(content) {getData(content, response)}
+
+"}
+getData() {ps.get(..., finish())
+
+  function ready(err, object) {finish(object, response)}
+
+}
+finish (content, object, response) { pt object into content and delive}
+*/
+
+
 // Serve a request by delivering a file.
 function handle(request, response) {
     var url = request.url.toLowerCase();
+    console.log(url);
     if (url.endsWith("/")) url = url + "index.html";
+    console.log(url);
+    if(url.startsWith("/item")) {
+      var file = "./public" + url;
+      return special(response, file);
+    }
     if (isBanned(url)) return fail(response, NotFound, "URL has been banned");
     var type = findType(url);
     if (type == null) return fail(response, BadType, "File type unsupported");
@@ -43,6 +66,18 @@ function handle(request, response) {
     fs.readFile(file, ready);
     function ready(err, content) { deliver(response, type, err, content); }
 }
+
+  function special(response, file) {
+    console.log(file);
+    fs.readFile(file, ready);
+    function ready(err, content) { getData(content, response); }
+  }
+
+  function getData(content, response) {
+    var STMT = db.prepare("select * from Item where Item.id = ? ");
+    STMT.run(item, show);
+    // STMT.finalize();
+  }
 
 // Forbid any resources which shouldn't be delivered to the browser.
 function isBanned(url) {
@@ -131,3 +166,6 @@ function defineTypes() {
     }
     return types;
 }
+
+
+/*--------------------------------Form Handling-------------------------------*/
