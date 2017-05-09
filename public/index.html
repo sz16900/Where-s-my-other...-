@@ -4,15 +4,14 @@
 <body>
   <p>I'm looking for my other... </p>
 <form method="get" action="/item.html">
-    <input name="id" value="e.g: shoe"/>
+    <label>Item id
+        <input type="text" name="id" value="e.g shoe"
+        onblur="if(this.value==''){ this.value='e.g shoe'; this.style.color='#BBB';}"
+        onfocus="if(this.value=='e.g shoe'){ this.value=''; this.style.color='#000';}"
+        style="color:#BBB;"/>
+    </label>
     <input type="submit" value="Submit"/>
 </form>
+<a href="create-person.html">Create new person</a>
 </body>
 </html>
-
-
-
-<!--
-var pices = content.split("$");
-var s = pieces[0] + obj.tst + pieces[1];
- -->

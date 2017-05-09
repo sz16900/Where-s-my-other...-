@@ -34,42 +34,81 @@ function start(port) {
     console.log("Server running at", address);
 }
 
-/*
-handles (request, response) { if(url.startswith("item") ) return special(...)}
-special () {fs.readfile("item.html", getData)   "have  a function inside called ready
-  ready(content) {getData(content, response)}
-
-"}
-getData() {ps.get(..., finish())
-
-  function ready(err, object) {finish(object, response)}
-
-}
-finish (content, object, response) { pt object into content and delive}
-*/
-
-
 // Serve a request by delivering a file.
 function handle(request, response) {
     var url = request.url.toLowerCase();
-    console.log("handle: "+url);
-    if (url.endsWith("/")) url = url + "index.html";
-    console.log("handle2: "+url);
+    if (url.endsWith("/")) handleIndex(response, url);
+    if (url.startsWith("/item")) handleItem(response, url);
+    if (url.startsWith("/create-person")) handleCreatePerson(response, url);
+    if (url.startsWith("/success-person")) handleSuccessPerson(response, url);
+    if (url.startsWith("/add-item")) handleAddItem(response, url);
+    if (url.startsWith("/success-item")) handleSuccessItem(response, url);
+
+    // validate(url, response);
+}
+
+// Handles the index page.
+function handleIndex(response, url) {
+    url = url + "index.html";
     var type = validate(url, response);
-
-    if(url.startsWith("/item")) {
-        var file = "./public" + url;
-        var pieces = file.split("?id=");
-        var searchId = pieces[1];
-        file = pieces[0];
-        console.log("File: "+file);
-        var type = validate(file, response);
-        return special(response, file, searchId, type);
-    }
-
     var file = "./public" + url;
     fs.readFile(file, ready);
     function ready(err, content) { deliver(response, type, err, content); }
+}
+
+// Handles the Item page.
+function handleItem(response, url) {
+    var file = "./public" + url;
+    var pieces = file.split("?id=");
+    var searchId = pieces[1];
+    file = pieces[0];
+    var type = validate(file, response);
+    return specialItemSearch(response, file, searchId, type);
+}
+
+// Handles the create Person page.
+function handleCreatePerson(response, url) {
+    console.log("url in: "+url);
+    var type = validate(url, response);
+    var file = "./public" + url;
+    console.log("file: "+file);
+    fs.readFile(file, ready);
+    function ready(err, content) { deliver(response, type, err, content); }
+}
+
+function handleSuccessPerson(response, url) {
+    console.log(url);
+    var file = "./public" + url;
+    var pieces = file.split("?name=");
+    var information = pieces[1];
+    file = pieces[0];
+    var information2 = information.split("&name=");
+    console.log(information2);
+    information2[1] = information2[1].replace("%40", "@");
+    var type = validate(file, response);
+    return specialSuccessPerson(response, file, information2, type);
+}
+
+function handleAddItem(response, url) {
+    console.log("url in: "+url);
+    var type = validate(url, response);
+    var file = "./public" + url;
+    console.log("file: "+file);
+    fs.readFile(file, ready);
+    function ready(err, content) { deliver(response, type, err, content); }
+}
+
+function handleSuccessItem(response, url) {
+    console.log(url);
+    var file = "./public" + url;
+    var pieces = file.split("?name=");
+    var information = pieces[1];
+    file = pieces[0];
+    var information2 = information.split("&name=");
+    // console.log(information2);
+    information2[0] = information2[0].replace("%40", "@");
+    var type = validate(file, response);
+    return specialSuccessItem(response, file, information2, type);
 }
 
 // Validates the url.
@@ -81,37 +120,68 @@ function validate(url, response) {
 }
 
 // readFile and runs getData to return page with queried data.
-function special(response, file, searchId, type) {
-    // console.log(file);
-    // console.log(searchId);
+function specialItemSearch(response, file, searchId, type) {
     fs.readFile(file, ready);
-    function ready(fileErr, content) { getData(content, response, searchId, type, fileErr); }
+    function ready(fileErr, content) { getDataItem(content, response, searchId, type, fileErr); }
+}
+
+function specialSuccessPerson(response, file, information2, type) {
+    fs.readFile(file, ready);
+    function ready(fileErr, content) { setDataPerson(content, response, information2, type, fileErr); }
+}
+
+function specialSuccessItem(response, file, information2, type) {
+    fs.readFile(file, ready);
+    function ready(fileErr, content) { setDataItem(content, response, information2, type, fileErr); }
 }
 
 // Prepares statement, runs query.
-function getData(content, response, searchId, type, fileErr) {
+// Need to catch edge cases and errors.
+function getDataItem(content, response, searchId, type, fileErr) {
     var STMT = db.prepare("select * from Item where Item.id = ? ");
-    console.log("getData: "+searchId);
-
     STMT.get(searchId, ready);
-    function ready(err, object) { finish(content, object, response, type, fileErr); }
+    function ready(err, object) { finishItem(content, object, response, type, fileErr); }
     STMT.finalize();
   }
 
+function setDataPerson(content, response, information2, type, fileErr) {
+    var STMT = db.prepare("insert into Person (name, email, phone) values (?, ?, ?)");
+    STMT.run(information2[0], information2[1], information2[2], ready);
+    function ready(err, object) { finishPerson(content, object, response, type, fileErr); }
+    STMT.finalize();
+}
+
+function setDataItem(content, response, information2, type, fileErr) {
+    console.log(information2);
+    checkEmailExists(information2[0], response);
+    var STMT = db.prepare("insert into Item (personEmail, title, description) values (?, ?, ?)");
+    STMT.run(information2[0], information2[1], information2[2], ready);
+    function ready(err, object) { finishSetItem(content, object, response, type, fileErr); }
+    STMT.finalize();
+}
+
+function checkEmailExists(email, response) {
+    var STMT = db.prepare("SELECT COUNT(id) AS exist FROM Person WHERE Person.email = ?");
+    STMT.get(email, ready);
+    // Need to handle the fail where email does not exist in a dynamic way on page, currently crashes server.
+    function ready(err, object) { if (object.exist != 1) return fail(response, NotFound, "Email not found"); }
+    STMT.finalize();
+}
+
 // Delivers Item page by splitting content and adding object data.
-function finish(content, object, response, type, fileErr) {
-    var id = object.id;
-    var title = object.title;
-    var description = object.description;
-    console.log(object);
-    console.log("id: "+id);
-    console.log("title: "+title);
-    console.log("description: "+description);
+function finishItem(content, object, response, type, fileErr) {
     var c = content+"";
     var pieces = c.split("$");
     var s = pieces[0]+object.id+pieces[1]+object.title+pieces[2]+object.description+pieces[3];
-    console.log(s);
     deliver(response, type, fileErr, s);
+}
+
+function finishPerson(content, object, response, type, fileErr) {
+    deliver(response, type, fileErr, content);
+}
+
+function finishSetItem(content, object, response, type, fileErr) {
+    deliver(response, type, fileErr, content);
 }
 
 // Forbid any resources which shouldn't be delivered to the browser.

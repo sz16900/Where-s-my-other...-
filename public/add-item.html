@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>Create new profile</title></head>
+<body>
+    <form method="get" action="/success-item.html">
+        <p><label>email
+            <input type="text" name="name" value="email"
+            onblur="if(this.value==''){ this.value='email'; this.style.color='#BBB';}"
+            onfocus="if(this.value=='email'){ this.value=''; this.style.color='#000';}"
+            style="color:#BBB;"/>
+        </label>
+        </p>
+        <p><label>title
+            <input type="text" name="name" value="title"
+            onblur="if(this.value==''){ this.value='title'; this.style.color='#BBB';}"
+            onfocus="if(this.value=='title'){ this.value=''; this.style.color='#000';}"
+            style="color:#BBB;"/>
+        </label>
+        </p>
+        <p><label>description
+            <input type="text" name="name" value="description"
+            onblur="if(this.value==''){ this.value='description'; this.style.color='#BBB';}"
+            onfocus="if(this.value=='description'){ this.value=''; this.style.color='#000';}"
+            style="color:#BBB;"/>
+        </label>
+        </p>
+        <input type="submit" value="Submit"/>
+    </form>
+</body>
+</html>
