@@ -67,6 +67,7 @@ function handleItem(response, url) {
 }
 
 // Handles the create Person page.
+// If change to POST - Reading the body page 34 on slides.
 function handleCreatePerson(response, url) {
     console.log("url in: "+url);
     var type = validate(url, response);
@@ -121,7 +122,8 @@ function validate(url, response) {
 
 // readFile and runs getData to return page with queried data.
 function specialItemSearch(response, file, searchId, type) {
-    fs.readFile(file, ready);
+    // readFile has extra arg for specifying text.
+    fs.readFile(file, "utf8", ready);
     function ready(fileErr, content) { getDataItem(content, response, searchId, type, fileErr); }
 }
 
@@ -132,7 +134,7 @@ function specialSuccessPerson(response, file, information2, type) {
 
 function specialSuccessItem(response, file, information2, type) {
     fs.readFile(file, ready);
-    function ready(fileErr, content) { setDataItem(content, response, information2, type, fileErr); }
+    function ready(fileErr, content) { checkEmailExists(information2[0], content, response, information2, type, fileErr); }
 }
 
 // Prepares statement, runs query.
@@ -144,6 +146,7 @@ function getDataItem(content, response, searchId, type, fileErr) {
     STMT.finalize();
   }
 
+
 function setDataPerson(content, response, information2, type, fileErr) {
     var STMT = db.prepare("insert into Person (name, email, phone) values (?, ?, ?)");
     STMT.run(information2[0], information2[1], information2[2], ready);
@@ -151,22 +154,29 @@ function setDataPerson(content, response, information2, type, fileErr) {
     STMT.finalize();
 }
 
+// Checks that the user has entered a validate email address, then alls the set data.
+function checkEmailExists(email, content, response, information2, type, fileErr) {
+    var STMT = db.prepare("SELECT COUNT(id) AS exist FROM Person WHERE Person.email = ?");
+    STMT.get(email, ready);
+    // Need to handle the fail where email does not exist in a dynamic way on page, currently crashes server.
+    function ready(err, object) {
+        if (object.exist == 1) {
+            setDataItem(content, response, information2, type, fileErr);
+        } else return fail(response, NotFound, "Email not found");
+    }
+    STMT.finalize();
+}
+
+
 function setDataItem(content, response, information2, type, fileErr) {
-    console.log(information2);
-    checkEmailExists(information2[0], response);
     var STMT = db.prepare("insert into Item (personEmail, title, description) values (?, ?, ?)");
     STMT.run(information2[0], information2[1], information2[2], ready);
     function ready(err, object) { finishSetItem(content, object, response, type, fileErr); }
     STMT.finalize();
 }
 
-function checkEmailExists(email, response) {
-    var STMT = db.prepare("SELECT COUNT(id) AS exist FROM Person WHERE Person.email = ?");
-    STMT.get(email, ready);
-    // Need to handle the fail where email does not exist in a dynamic way on page, currently crashes server.
-    function ready(err, object) { if (object.exist != 1) return fail(response, NotFound, "Email not found"); }
-    STMT.finalize();
-}
+
+
 
 // Delivers Item page by splitting content and adding object data.
 function finishItem(content, object, response, type, fileErr) {

@@ -20,4 +20,4 @@ INSERT INTO Person (name, email) VALUES ("rob", "rr@gmail.com");
 INSERT INTO Person (name, email) VALUES ("seth", "sz@gmail.com");
 
 INSERT INTO Item (personEmail, title, description) VALUES ("rr@gmail.com", "Shoe", "A blue nike shoe, left, size 9");
-INSERT INTO Item (personIEmail, title, description) VALUES ("sz@gmail.com", "Mitten", "A red mitten for the right hand");
+INSERT INTO Item (personEmail, title, description) VALUES ("sz@gmail.com", "Mitten", "A red mitten for the right hand");
