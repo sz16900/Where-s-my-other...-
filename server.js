@@ -40,7 +40,7 @@ function handle(request, response) {
     if (url.endsWith("/")) handleIndex(response, url);
     if (url.startsWith("/item")) handleItem(response, url);
     if (url.startsWith("/create-person")) handleCreatePerson(response, url);
-    if (url.startsWith("/success-person")) handleSuccessPerson(response, url);
+    if (url.startsWith("/success-person")) handleSuccessPerson(request, response, url);
     if (url.startsWith("/add-item")) handleAddItem(response, url);
     if (url.startsWith("/success-item")) handleSuccessItem(response, url);
 
@@ -67,7 +67,6 @@ function handleItem(response, url) {
 }
 
 // Handles the create Person page.
-// If change to POST - Reading the body page 34 on slides.
 function handleCreatePerson(response, url) {
     console.log("url in: "+url);
     var type = validate(url, response);
@@ -77,17 +76,22 @@ function handleCreatePerson(response, url) {
     function ready(err, content) { deliver(response, type, err, content); }
 }
 
-function handleSuccessPerson(response, url) {
-    console.log(url);
+// Handles parsing form data using POST method for creating a new person.
+function handleSuccessPerson(request, response, url) {
     var file = "./public" + url;
-    var pieces = file.split("?name=");
-    var information = pieces[1];
-    file = pieces[0];
-    var information2 = information.split("&name=");
-    console.log(information2);
-    information2[1] = information2[1].replace("%40", "@");
-    var type = validate(file, response);
-    return specialSuccessPerson(response, file, information2, type);
+    request.on('data', add);
+    request.on('end', end);
+    var body = "";
+    function add(chunk) {
+        body = body + chunk.toString();
+    }
+    function end() {
+        body = decodeURIComponent(body);
+        body = body.slice(5);
+        var personData = body.split("&name=");
+        var type = validate(file, response);
+        return specialSuccessPerson(response, file, personData, type);
+    }
 }
 
 function handleAddItem(response, url) {
@@ -105,11 +109,11 @@ function handleSuccessItem(response, url) {
     var pieces = file.split("?name=");
     var information = pieces[1];
     file = pieces[0];
-    var information2 = information.split("&name=");
-    // console.log(information2);
-    information2[0] = information2[0].replace("%40", "@");
+    var itemData = information.split("&name=");
+    // console.log(itemData);
+    itemData[0] = itemData[0].replace("%40", "@");
     var type = validate(file, response);
-    return specialSuccessItem(response, file, information2, type);
+    return specialSuccessItem(response, file, itemData, type);
 }
 
 // Validates the url.
@@ -122,19 +126,19 @@ function validate(url, response) {
 
 // readFile and runs getData to return page with queried data.
 function specialItemSearch(response, file, searchId, type) {
-    // readFile has extra arg for specifying text.
     fs.readFile(file, "utf8", ready);
     function ready(fileErr, content) { getDataItem(content, response, searchId, type, fileErr); }
 }
 
-function specialSuccessPerson(response, file, information2, type) {
+// need to add validating methods for person input.
+function specialSuccessPerson(response, file, personData, type) {
     fs.readFile(file, ready);
-    function ready(fileErr, content) { setDataPerson(content, response, information2, type, fileErr); }
+    function ready(fileErr, content) { setDataPerson(content, response, personData, type, fileErr); }
 }
 
-function specialSuccessItem(response, file, information2, type) {
+function specialSuccessItem(response, file, itemData, type) {
     fs.readFile(file, ready);
-    function ready(fileErr, content) { checkEmailExists(information2[0], content, response, information2, type, fileErr); }
+    function ready(fileErr, content) { checkEmailExists(itemData[0], content, response, itemData, type, fileErr); }
 }
 
 // Prepares statement, runs query.
@@ -147,30 +151,31 @@ function getDataItem(content, response, searchId, type, fileErr) {
   }
 
 
-function setDataPerson(content, response, information2, type, fileErr) {
+function setDataPerson(content, response, personData, type, fileErr) {
     var STMT = db.prepare("insert into Person (name, email, phone) values (?, ?, ?)");
-    STMT.run(information2[0], information2[1], information2[2], ready);
+    console.log(personData);
+    STMT.run(personData[0], personData[1], personData[2], ready);
     function ready(err, object) { finishPerson(content, object, response, type, fileErr); }
     STMT.finalize();
 }
 
 // Checks that the user has entered a validate email address, then alls the set data.
-function checkEmailExists(email, content, response, information2, type, fileErr) {
+function checkEmailExists(email, content, response, itemData, type, fileErr) {
     var STMT = db.prepare("SELECT COUNT(id) AS exist FROM Person WHERE Person.email = ?");
     STMT.get(email, ready);
     // Need to handle the fail where email does not exist in a dynamic way on page, currently crashes server.
     function ready(err, object) {
         if (object.exist == 1) {
-            setDataItem(content, response, information2, type, fileErr);
+            setDataItem(content, response, itemData, type, fileErr);
         } else return fail(response, NotFound, "Email not found");
     }
     STMT.finalize();
 }
 
 
-function setDataItem(content, response, information2, type, fileErr) {
+function setDataItem(content, response, itemData, type, fileErr) {
     var STMT = db.prepare("insert into Item (personEmail, title, description) values (?, ?, ?)");
-    STMT.run(information2[0], information2[1], information2[2], ready);
+    STMT.run(itemData[0], itemData[1], itemData[2], ready);
     function ready(err, object) { finishSetItem(content, object, response, type, fileErr); }
     STMT.finalize();
 }
@@ -180,8 +185,7 @@ function setDataItem(content, response, information2, type, fileErr) {
 
 // Delivers Item page by splitting content and adding object data.
 function finishItem(content, object, response, type, fileErr) {
-    var c = content+"";
-    var pieces = c.split("$");
+    var pieces = content.split("$");
     var s = pieces[0]+object.id+pieces[1]+object.title+pieces[2]+object.description+pieces[3];
     deliver(response, type, fileErr, s);
 }
@@ -281,6 +285,3 @@ function defineTypes() {
     }
     return types;
 }
-
-
-/*--------------------------------Form Handling-------------------------------*/

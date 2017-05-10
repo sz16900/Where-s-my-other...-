@@ -11,7 +11,7 @@ CREATE TABLE Person (
 CREATE TABLE Item (
   personEmail VARCHAR(100),
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  title VARCHAR(255) NOT NULL,
+  title VARCHAR(100) NOT NULL,
   description TEXT NOT NULL,
   CONSTRAINT personEmailConstraint FOREIGN KEY (personEmail) REFERENCES Person(email)
 );
