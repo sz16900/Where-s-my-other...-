@@ -42,7 +42,7 @@ function handle(request, response) {
     if (url.startsWith("/create-person")) handleCreatePerson(response, url);
     if (url.startsWith("/success-person")) handleSuccessPerson(request, response, url);
     if (url.startsWith("/add-item")) handleAddItem(response, url);
-    if (url.startsWith("/success-item")) handleSuccessItem(response, url);
+    if (url.startsWith("/success-item")) handleSuccessItem(request, response, url);
 
     // validate(url, response);
 }
@@ -56,14 +56,23 @@ function handleIndex(response, url) {
     function ready(err, content) { deliver(response, type, err, content); }
 }
 
-// Handles the Item page.
+// Handles the Item page - on Item ID search.
 function handleItem(response, url) {
     var file = "./public" + url;
-    var pieces = file.split("?id=");
+    var pieces = "";
+    var flag = -1;
+    if (url.includes("?id=")) {
+        pieces = file.split("?id=");
+        flag = 0;
+    } else {
+        pieces = file.split("?title=");
+        flag = 1;
+    }
     var searchId = pieces[1];
     file = pieces[0];
     var type = validate(file, response);
-    return specialItemSearch(response, file, searchId, type);
+    if (flag === 0) return specialItemSearch(response, file, searchId, type);
+    if (flag === 1) return specialItemSearchTitle(response, file, searchId, type);
 }
 
 // Handles the create Person page.
@@ -94,6 +103,7 @@ function handleSuccessPerson(request, response, url) {
     }
 }
 
+// Handles request for Item page.
 function handleAddItem(response, url) {
     console.log("url in: "+url);
     var type = validate(url, response);
@@ -103,17 +113,22 @@ function handleAddItem(response, url) {
     function ready(err, content) { deliver(response, type, err, content); }
 }
 
-function handleSuccessItem(response, url) {
-    console.log(url);
+// Handles parsing form data using POST method for creating a new item.
+function handleSuccessItem(request, response, url) {
     var file = "./public" + url;
-    var pieces = file.split("?name=");
-    var information = pieces[1];
-    file = pieces[0];
-    var itemData = information.split("&name=");
-    // console.log(itemData);
-    itemData[0] = itemData[0].replace("%40", "@");
-    var type = validate(file, response);
-    return specialSuccessItem(response, file, itemData, type);
+    request.on('data', add);
+    request.on('end', end);
+    var body = "";
+    function add(chunk) {
+        body = body + chunk.toString();
+    }
+    function end() {
+        body = decodeURIComponent(body);
+        body = body.slice(5);
+        var personData = body.split("&name=");
+        var type = validate(file, response);
+        return specialSuccessItem(response, file, personData, type);
+    }
 }
 
 // Validates the url.
@@ -130,6 +145,13 @@ function specialItemSearch(response, file, searchId, type) {
     function ready(fileErr, content) { getDataItem(content, response, searchId, type, fileErr); }
 }
 
+// readFile and runs getData to return page with queried data.
+function specialItemSearchTitle(response, file, searchTitle, type) {
+    console.log(searchTitle);
+    fs.readFile(file, "utf8", ready);
+    function ready(fileErr, content) { getDataItemTitle(content, response, searchTitle, type, fileErr); }
+}
+
 // need to add validating methods for person input.
 function specialSuccessPerson(response, file, personData, type) {
     fs.readFile(file, ready);
@@ -144,15 +166,28 @@ function specialSuccessItem(response, file, itemData, type) {
 // Prepares statement, runs query.
 // Need to catch edge cases and errors.
 function getDataItem(content, response, searchId, type, fileErr) {
-    var STMT = db.prepare("select * from Item where Item.id = ? ");
+    var STMT = db.prepare("SELECT * FROM Item WHERE Item.id = ?");
     STMT.get(searchId, ready);
     function ready(err, object) { finishItem(content, object, response, type, fileErr); }
     STMT.finalize();
   }
 
+  // Prepares statement, runs query.
+  // Need to catch edge cases and errors.
+  // Very simple search on title has to match part of title.
+  // Looking into using XOJO a full text search extension for sqlite3.
+  function getDataItemTitle(content, response, searchTitle, type, fileErr) {
+      searchTitle = "%" + searchTitle + "%";
+      console.log(searchTitle);
+      var STMT = db.prepare("SELECT * FROM Item WHERE Item.title LIKE ?");
+      STMT.get(searchTitle, ready);
+      function ready(err, object) { finishItem(content, object, response, type, fileErr); }
+      STMT.finalize();
+    }
+
 
 function setDataPerson(content, response, personData, type, fileErr) {
-    var STMT = db.prepare("insert into Person (name, email, phone) values (?, ?, ?)");
+    var STMT = db.prepare("INSERT INTO Person (name, email, phone) VALUES (?, ?, ?)");
     console.log(personData);
     STMT.run(personData[0], personData[1], personData[2], ready);
     function ready(err, object) { finishPerson(content, object, response, type, fileErr); }
@@ -172,16 +207,13 @@ function checkEmailExists(email, content, response, itemData, type, fileErr) {
     STMT.finalize();
 }
 
-
+// Prepares insert statement for new item.
 function setDataItem(content, response, itemData, type, fileErr) {
-    var STMT = db.prepare("insert into Item (personEmail, title, description) values (?, ?, ?)");
+    var STMT = db.prepare("INSERT INTO Item (personEmail, title, description) VALUES (?, ?, ?)");
     STMT.run(itemData[0], itemData[1], itemData[2], ready);
     function ready(err, object) { finishSetItem(content, object, response, type, fileErr); }
     STMT.finalize();
 }
-
-
-
 
 // Delivers Item page by splitting content and adding object data.
 function finishItem(content, object, response, type, fileErr) {
