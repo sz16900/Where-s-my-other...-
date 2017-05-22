@@ -42,14 +42,21 @@ function start(port) {
 // Serve a request by delivering a file.
 function handle(request, response) {
     var url = request.url.toLowerCase();
-    if (url.endsWith("/")) handleIndex(response, url);
     if (url.startsWith("/item")) handleItem(response, url);
     if (url.startsWith("/create-person")) handleCreatePerson(response, url);
     if (url.startsWith("/success-person")) handleSuccessPerson(request, response, url);
     if (url.startsWith("/add-item")) handleAddItem(response, url);
     if (url.startsWith("/success-item")) handleSuccessItem(request, response, url);
+    if (url.endsWith("/")) handleIndex(response, url);
+    if (url.startsWith("/css") || url.startsWith("/img")) handleResources(response, url);
 
-    // validate(url, response);
+}
+
+function handleResources(response, url) {
+    var type = validate(url, response);
+    var file = "./public" + url;
+    fs.readFile(file, ready);
+    function ready(err, content) { deliver(response, type, err, content); }
 }
 
 // Handles the index page.
@@ -60,6 +67,7 @@ function handleIndex(response, url) {
     fs.readFile(file, ready);
     function ready(err, content) { deliver(response, type, err, content); }
 }
+
 
 // Handles the Item page - on Item ID search.
 function handleItem(response, url) {
@@ -136,6 +144,7 @@ function handleSuccessItem(request, response, url) {
 function validate(url, response) {
     if (isBanned(url)) return fail(response, NotFound, "URL has been banned");
     var type = findType(url);
+    console.log(type);
     if (type === null) return fail(response, BadType, "File type unsupported");
     return type;
 }
@@ -160,7 +169,7 @@ function specialSuccessItem(response, file, itemData, type) {
 
   // Prepares statement, runs query.
   // Need to catch edge cases and errors.
-  // Very simple search on title has to match part of title.
+  // Very simple search on title has to match part of title.l
   // Looking into using FTS4 (full text search) a full text search extension for sqlite3.
   function getDataItem(content, response, searchTitle, type, fileErr) {
       searchTitle = searchTitle.replace(/\+/g, " OR ");
@@ -193,7 +202,7 @@ function checkEmailExists(email, content, response, itemData, type, fileErr) {
         } else return fail(response, NotFound, "Email not found");
     }
     STMT.finalize();
-}
+}validate
 
 // Prepares insert statement for new item.
 function setDataItem(content, response, itemData, type, fileErr) {
