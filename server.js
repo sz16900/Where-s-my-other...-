@@ -12,6 +12,11 @@
 // Start the server: change the port to the default 80, if there are no
 // privilege issues and port number 80 isn't already in use.
 
+// TO DO:
+    // Check if person's email exists
+    // Is the Virtual Table updated??
+    // Sort by relevance optimized
+
 "use strict";
 
 var http = require("http");
@@ -60,19 +65,11 @@ function handleIndex(response, url) {
 function handleItem(response, url) {
     var file = "./public" + url;
     var pieces = "";
-    var flag = -1;
-    if (url.includes("?id=")) {
-        pieces = file.split("?id=");
-        flag = 0;
-    } else {
-        pieces = file.split("?title=");
-        flag = 1;
-    }
+    pieces = file.split("?title=");
     var searchId = pieces[1];
     file = pieces[0];
     var type = validate(file, response);
-    if (flag === 0) return specialItemSearch(response, file, searchId, type);
-    if (flag === 1) return specialItemSearchTitle(response, file, searchId, type);
+    return specialItemSearch(response, file, searchId, type);
 }
 
 // Handles the create Person page.
@@ -114,6 +111,7 @@ function handleAddItem(response, url) {
 }
 
 // Handles parsing form data using POST method for creating a new item.
+// If there's too much data, kill the connection
 function handleSuccessItem(request, response, url) {
     var file = "./public" + url;
     request.on('data', add);
@@ -121,13 +119,16 @@ function handleSuccessItem(request, response, url) {
     var body = "";
     function add(chunk) {
         body = body + chunk.toString();
+        // What if someone puts a plus in there???!!
+        body = body.replace(/\+/g, " ");
+        console.log("Body chunk: " + body);
     }
     function end() {
         body = decodeURIComponent(body);
         body = body.slice(5);
-        var personData = body.split("&name=");
+        var itemData = body.split("&name=");
         var type = validate(file, response);
-        return specialSuccessItem(response, file, personData, type);
+        return specialSuccessItem(response, file, itemData, type);
     }
 }
 
@@ -140,16 +141,10 @@ function validate(url, response) {
 }
 
 // readFile and runs getData to return page with queried data.
-function specialItemSearch(response, file, searchId, type) {
-    fs.readFile(file, "utf8", ready);
-    function ready(fileErr, content) { getDataItem(content, response, searchId, type, fileErr); }
-}
-
-// readFile and runs getData to return page with queried data.
-function specialItemSearchTitle(response, file, searchTitle, type) {
+function specialItemSearch(response, file, searchTitle, type) {
     console.log(searchTitle);
     fs.readFile(file, "utf8", ready);
-    function ready(fileErr, content) { getDataItemTitle(content, response, searchTitle, type, fileErr); }
+    function ready(fileErr, content) { getDataItem(content, response, searchTitle, type, fileErr); }
 }
 
 // need to add validating methods for person input.
@@ -163,29 +158,22 @@ function specialSuccessItem(response, file, itemData, type) {
     function ready(fileErr, content) { checkEmailExists(itemData[0], content, response, itemData, type, fileErr); }
 }
 
-// Prepares statement, runs query.
-// Need to catch edge cases and errors.
-function getDataItem(content, response, searchId, type, fileErr) {
-    var STMT = db.prepare("SELECT * FROM Item WHERE Item.id = ?");
-    STMT.get(searchId, ready);
-    function ready(err, object) { finishItem(content, object, response, type, fileErr); }
-    STMT.finalize();
-  }
-
   // Prepares statement, runs query.
   // Need to catch edge cases and errors.
   // Very simple search on title has to match part of title.
-  // Looking into using XOJO a full text search extension for sqlite3.
-  function getDataItemTitle(content, response, searchTitle, type, fileErr) {
-      searchTitle = "%" + searchTitle + "%";
+  // Looking into using FTS4 (full text search) a full text search extension for sqlite3.
+  function getDataItem(content, response, searchTitle, type, fileErr) {
+      searchTitle = searchTitle.replace(/\+/g, " OR ");
       console.log(searchTitle);
-      var STMT = db.prepare("SELECT * FROM Item WHERE Item.title LIKE ?");
-      STMT.get(searchTitle, ready);
-      function ready(err, object) { finishItem(content, object, response, type, fileErr); }
+      var STMT = db.prepare("SELECT * FROM ItemSearch WHERE ItemSearch MATCH ?");
+      STMT.all(searchTitle, ready);
+      function ready(err, object) {
+        console.log(object);
+        finishItem(content, object, response, type, fileErr); }
       STMT.finalize();
     }
 
-
+// Needs to check if this person's email exists
 function setDataPerson(content, response, personData, type, fileErr) {
     var STMT = db.prepare("INSERT INTO Person (name, email, phone) VALUES (?, ?, ?)");
     console.log(personData);
@@ -217,8 +205,14 @@ function setDataItem(content, response, itemData, type, fileErr) {
 
 // Delivers Item page by splitting content and adding object data.
 function finishItem(content, object, response, type, fileErr) {
-    var pieces = content.split("$");
-    var s = pieces[0]+object.id+pieces[1]+object.title+pieces[2]+object.description+pieces[3];
+  var header = content.split("<!-- {list} -->");
+  var s = "";
+    for (var i = 0; i < object.length; i++) {
+    var pieces = header[1].split("$");
+    s += pieces[0]+object[i].id+pieces[1]+object[i].title+pieces[2]+object[i].description+pieces[3];
+    }
+    s = header[0]+s+header[2];
+    console.log(s);
     deliver(response, type, fileErr, s);
 }
 
