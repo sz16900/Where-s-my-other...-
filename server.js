@@ -23,6 +23,7 @@ var http = require("http");
 var fs = require("fs");
 var sql = require("sqlite3");
 var db = new sql.Database("data.db");
+db.loadExtension("./okapi_bm25.sqlext");
 var OK = 200, NotFound = 404, BadType = 415, Error = 500;
 var types, banned;
 start(8080);
@@ -165,11 +166,17 @@ function specialSuccessItem(response, file, itemData, type) {
   function getDataItem(content, response, searchTitle, type, fileErr) {
       searchTitle = searchTitle.replace(/\+/g, " OR ");
       console.log(searchTitle);
-      var STMT = db.prepare("SELECT * FROM ItemSearch WHERE ItemSearch MATCH ?");
+      var STMT = db.prepare("SELECT * FROM ItemSearch WHERE ItemSearch MATCH ? ORDER BY okapi_bm25(matchinfo(ItemSearch, 'pcxnal'), 2) ASC");
+
+    //   var STMT = db.prepare("SELECT id, title, description, okapi_bm25f(matchinfo(ItemSearch, 'pcxnal'), 0) AS rank "+
+	//                         "FROM ItemSearch "+
+    //                         "WHERE ItemSearch MATCH ?"+
+    //                         "ORDER BY rank DESC ");
+
       STMT.all(searchTitle, ready);
       function ready(err, object) {
-        console.log(object);
-        finishItem(content, object, response, type, fileErr); }
+          console.log(object);
+          finishItem(content, object, response, type, fileErr); }
       STMT.finalize();
     }
 
