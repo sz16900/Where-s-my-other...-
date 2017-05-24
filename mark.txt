@@ -1,0 +1,11 @@
+<ul>
+<li>B for HTML</li>
+<li>B for CSS</li>
+<li>X for JS</li>
+<li>A for PNG</li>
+<li>X for SVG</li>
+<li>A for Server</li>
+<li>A for Database</li>
+<li>A for Dynamic pages</li>
+<li>B(search) for Depth (out of 40)</li>
+</ul>
