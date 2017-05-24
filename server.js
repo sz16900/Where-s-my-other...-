@@ -48,9 +48,21 @@ function handle(request, response) {
     if (url.startsWith("/success-person")) handleSuccessPerson(request, response, url);
     if (url.startsWith("/add-item")) handleAddItem(response, url);
     if (url.startsWith("/success-item")) handleSuccessItem(request, response, url);
+    if (url.startsWith("/detailed-item")) detailedItem(request, response, url);
     if (url.endsWith("/")) handleIndex(response, url);
     if (url.startsWith("/css") || url.startsWith("/img")) handleResources(response, url);
 
+}
+
+function detailedItem(request, response, url) {
+  var file = "./public" + url;
+  var pieces = "";
+  pieces = file.split("?id=");
+  console.log("URL:" + url);
+  var detailedItemId = pieces[1];
+  file = pieces[0];
+  var type = validate(file, response);
+  return specialDetailedItem(response, file, detailedItemId, type);
 }
 
 function handleResources(response, url) {
@@ -83,10 +95,8 @@ function handleItem(response, url) {
 
 // Handles the create Person page.
 function handleCreatePerson(response, url) {
-    console.log("url in: "+url);
     var type = validate(url, response);
     var file = "./public" + url;
-    console.log("file: "+file);
     fs.readFile(file, ready);
     function ready(err, content) { deliver(response, type, err, content); }
 }
@@ -111,10 +121,8 @@ function handleSuccessPerson(request, response, url) {
 
 // Handles request for Item page.
 function handleAddItem(response, url) {
-    console.log("url in: "+url);
     var type = validate(url, response);
     var file = "./public" + url;
-    console.log("file: "+file);
     fs.readFile(file, ready);
     function ready(err, content) { deliver(response, type, err, content); }
 }
@@ -130,7 +138,6 @@ function handleSuccessItem(request, response, url) {
         body = body + chunk.toString();
         // What if someone puts a plus in there???!!
         body = body.replace(/\+/g, " ");
-        console.log("Body chunk: " + body);
     }
     function end() {
         body = decodeURIComponent(body);
@@ -152,7 +159,6 @@ function validate(url, response) {
 
 // readFile and runs getData to return page with queried data.
 function specialItemSearch(response, file, searchTitle, type) {
-    console.log(searchTitle);
     fs.readFile(file, "utf8", ready);
     function ready(fileErr, content) { getDataItem(content, response, searchTitle, type, fileErr); }
 }
@@ -168,31 +174,38 @@ function specialSuccessItem(response, file, itemData, type) {
     function ready(fileErr, content) { checkEmailExists(itemData[0], content, response, itemData, type, fileErr); }
 }
 
-  // Prepares statement, runs query.
-  // Need to catch edge cases and errors.
-  // Very simple search on title has to match part of title.l
-  // Looking into using FTS4 (full text search) a full text search extension for sqlite3.
-  function getDataItem(content, response, searchTitle, type, fileErr) {
-      searchTitle = searchTitle.replace(/\+/g, " OR ");
-      console.log(searchTitle);
-      var STMT = db.prepare("SELECT * FROM ItemSearch WHERE ItemSearch MATCH ? ORDER BY okapi_bm25(matchinfo(ItemSearch, 'pcxnal'), 2) ASC");
+function specialDetailedItem(response, file, detailedItemId, type) {
+  fs.readFile(file, "utf8", ready);
+  function ready(fileErr, content) { getDetailedDataItem(content, response, detailedItemId, type, fileErr); }
+}
 
-    //   var STMT = db.prepare("SELECT id, title, description, okapi_bm25f(matchinfo(ItemSearch, 'pcxnal'), 0) AS rank "+
-	//                         "FROM ItemSearch "+
-    //                         "WHERE ItemSearch MATCH ?"+
-    //                         "ORDER BY rank DESC ");
+// Prepares statement, runs query.
+// Need to catch edge cases and errors.
+// Very simple search on title has to match part of title.l
+// Looking into using FTS4 (full text search) a full text search extension for sqlite3.
+function getDataItem(content, response, searchTitle, type, fileErr) {
+  //split up if multiple words with SQL OR
+    searchTitle = searchTitle.replace(/\+/g, " OR ");
+    var STMT = db.prepare("SELECT * FROM ItemSearch WHERE ItemSearch MATCH ? ORDER BY okapi_bm25(matchinfo(ItemSearch, 'pcxnal'), 2) DESC");
+    STMT.all(searchTitle, ready);
+    function ready(err, object) {
+        finishItem(content, object, response, type, fileErr); }
+    STMT.finalize();
+  }
 
-      STMT.all(searchTitle, ready);
-      function ready(err, object) {
-          console.log(object);
-          finishItem(content, object, response, type, fileErr); }
-      STMT.finalize();
-    }
+  // Shouldnt be joining on email because we dont know if they changed their email
+  function getDetailedDataItem(content, response, detailedItemId, type, fileErr) {
+    var STMT = db.prepare("SELECT Item.title, Item.location, Item.description, Item.postedDate, Person.phone FROM Item Join Person ON Item.personEmail = Person.email WHERE Item.id = ?");
+    STMT.get(detailedItemId, ready);
+    function ready(err, object) {
+        console.log(object);
+        finishDetailedItem(content, object, response, type, fileErr); }
+    STMT.finalize();
+  }
 
 // Needs to check if this person's email exists
 function setDataPerson(content, response, personData, type, fileErr) {
     var STMT = db.prepare("INSERT INTO Person (name, email, phone) VALUES (?, ?, ?)");
-    console.log(personData);
     STMT.run(personData[0], personData[1], personData[2], ready);
     function ready(err, object) { finishPerson(content, object, response, type, fileErr); }
     STMT.finalize();
@@ -209,12 +222,12 @@ function checkEmailExists(email, content, response, itemData, type, fileErr) {
         } else return fail(response, NotFound, "Email not found");
     }
     STMT.finalize();
-}validate
+}
 
 // Prepares insert statement for new item.
 function setDataItem(content, response, itemData, type, fileErr) {
-    var STMT = db.prepare("INSERT INTO Item (personEmail, title, description) VALUES (?, ?, ?)");
-    STMT.run(itemData[0], itemData[1], itemData[2], ready);
+    var STMT = db.prepare("INSERT INTO Item (personEmail, title, description, location, postedDate) VALUES (?, ?, ?, ?, datetime('now'))");
+    STMT.run(itemData[0], itemData[1], itemData[2], itemData[3], ready);
     function ready(err, object) { finishSetItem(content, object, response, type, fileErr); }
     STMT.finalize();
 }
@@ -225,9 +238,15 @@ function finishItem(content, object, response, type, fileErr) {
   var s = "";
     for (var i = 0; i < object.length; i++) {
     var pieces = header[1].split("$");
-    s += pieces[0]+object[i].id+pieces[1]+object[i].title+pieces[2]+object[i].description+pieces[3];
+    s += pieces[0]+object[i].id+pieces[1]+object[i].title+pieces[2]+object[i].location+pieces[3]+object[i].description+pieces[4]+object[i].postedDate+pieces[5];
     }
     s = header[0]+s+header[2];
+    deliver(response, type, fileErr, s);
+}
+
+function finishDetailedItem(content, object, response, type, fileErr) {
+    var pieces = content.split("$");
+    var s = pieces[0]+object.title+pieces[1]+object.location+pieces[2]+object.description+pieces[3]+object.postedDate+pieces[4]+object.phone+pieces[5];
     console.log(s);
     deliver(response, type, fileErr, s);
 }
