@@ -1,17 +1,53 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head><title>Test</title></head>
-<body>
-  <p>I'm looking for my other... </p>
 
-<p>
-<form method="get" action="/item.html">
-    <label>Search Item 
-        <input type="text" name="title" placeholder="I'm looking for my other..."/>
-    </label>
-    <input type="submit" value="Submit"/>
-</form>
-</p>
-<a href="create-person.html">Create new person</a>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-GB" xml:lang="en-GB">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet"/>
+    <link rel="icon" type="image/png" href="../img/fresh_air_logo_icon.png"/>
+    <title>Where's my other...</title>
+</head>
+
+<body>
+
+  <header>
+		<a href="/" id="logo"></a>
+        <div id="title">
+            <h1>Where's my other...</h1>
+        </div>
+		<nav>
+			<a href="#" id="menu-icon"></a>
+			<ul>
+				<li><a href="#">Login</a></li>
+        <li><a href="create-person.html">Sign Up</a></li>
+				<li><a href="add-item.html">Post an Item</a></li>
+			</ul>
+		</nav>
+	</header>
+
+<div id="search">
+
+
+    <form method="get" action="/item.html" id="myForm">
+      <input type="text" name="title" placeholder="I'm looking for my other..."/>
+      <input type="submit" value="Submit"/>
+    </form>
+
+    <!-- <div id="wrap">
+  <form method="get" action="/item.html" autocomplete="on">
+  <input id="search" name="search" type="text" placeholder="What're we looking for ?">
+  <input id="search_submit" value="Rechercher" type="submit">
+  </form>
+</div> -->
+
+
+</div>
+
+<footer class="site-footer">
+    <div id="foot"> &#169; Seth and Rob's website</div>
+</footer>
+
 </body>
 </html>

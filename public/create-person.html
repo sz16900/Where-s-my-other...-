@@ -1,21 +1,52 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head><title>Create new profile</title></head>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-GB" xml:lang="en-GB">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet"/>
+    <link rel="icon" type="image/png" href="../img/fresh_air_logo_icon.png"/>
+    <title>Item</title>
+</head>
 <body>
-    <form method="post" action="/success-person.html">
-        <p><label>name
-            <input type="text" name="name" placeholder="name"/>
-        </label>
-        </p>
-        <p><label>email
-            <input type="text" name="name" placeholder="email"/>
-        </label>
-        </p>
-        <p><label>phone
-            <input type="text" name="name" placeholder="phone"/>
-        </label>
-        </p>
-        <input type="submit" value="Submit"/>
-    </form>
+  <header>
+		<a href="/" id="logo"></a>
+        <div id="title">
+            <h1>Where's my other...</h1>
+        </div>
+		<nav>
+			<a href="index.html" id="menu-icon"></a>
+			<ul>
+				<li><a href="#">Login</a></li>
+        <li><a href="create-person.html">Sign Up</a></li>
+				<li><a href="add-item.html">Post an Item</a></li>
+			</ul>
+		</nav>
+	</header>
+
+<div id="createForm">
+  <form method="post" action="/success-person.html">
+      <p><label>name
+          <input type="text" name="name" placeholder="name"/>
+      </label>
+      </p>
+      <p><label>email
+          <input type="text" name="name" placeholder="email"/>
+      </label>
+      </p>
+      <p><label>phone
+          <input type="text" name="name" placeholder="phone"/>
+      </label>
+      </p>
+      <input type="submit" value="Submit"/>
+  </form>
+</div>
+
+
+<footer class="site-footer">
+    <div id="foot"> &#169; Seth and Rob's website</div>
+</footer>
+
 </body>
 </html>
