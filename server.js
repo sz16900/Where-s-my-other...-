@@ -50,15 +50,13 @@ function handle(request, response) {
     if (url.startsWith("/success-item")) handleSuccessItem(request, response, url);
     if (url.startsWith("/detailed-item")) detailedItem(request, response, url);
     if (url.endsWith("/")) handleIndex(response, url);
-    if (url.startsWith("/css") || url.startsWith("/img")) handleResources(response, url);
-
+    if (url.startsWith("/css") || url.startsWith("/img") || url.startsWith("/js")) handleResources(response, url);
 }
 
 function detailedItem(request, response, url) {
   var file = "./public" + url;
   var pieces = "";
   pieces = file.split("?id=");
-  console.log("URL:" + url);
   var detailedItemId = pieces[1];
   file = pieces[0];
   var type = validate(file, response);
@@ -134,10 +132,15 @@ function handleSuccessItem(request, response, url) {
     request.on('data', add);
     request.on('end', end);
     var body = "";
+    // var body;
     function add(chunk) {
+      // console.log(chunk);
+      // console.log(typeof(chunk));
+      // body = body + chunk;
         body = body + chunk.toString();
         // What if someone puts a plus in there???!!
         body = body.replace(/\+/g, " ");
+        console.log(body);
     }
     function end() {
         body = decodeURIComponent(body);
@@ -184,7 +187,7 @@ function specialDetailedItem(response, file, detailedItemId, type) {
 // Very simple search on title has to match part of title.l
 // Looking into using FTS4 (full text search) a full text search extension for sqlite3.
 function getDataItem(content, response, searchTitle, type, fileErr) {
-  //split up if multiple words with SQL OR
+    //split up if multiple words with SQL OR
     searchTitle = searchTitle.replace(/\+/g, " OR ");
     var STMT = db.prepare("SELECT * FROM ItemSearch WHERE ItemSearch MATCH ? ORDER BY okapi_bm25(matchinfo(ItemSearch, 'pcxnal'), 2) DESC");
     STMT.all(searchTitle, ready);
@@ -193,15 +196,14 @@ function getDataItem(content, response, searchTitle, type, fileErr) {
     STMT.finalize();
   }
 
-  // Shouldnt be joining on email because we dont know if they changed their email
-  function getDetailedDataItem(content, response, detailedItemId, type, fileErr) {
+// Shouldnt be joining on email because we dont know if they changed their email
+function getDetailedDataItem(content, response, detailedItemId, type, fileErr) {
     var STMT = db.prepare("SELECT Item.title, Item.location, Item.description, Item.postedDate, Person.phone FROM Item Join Person ON Item.personEmail = Person.email WHERE Item.id = ?");
     STMT.get(detailedItemId, ready);
     function ready(err, object) {
-        console.log(object);
         finishDetailedItem(content, object, response, type, fileErr); }
     STMT.finalize();
-  }
+}
 
 // Needs to check if this person's email exists
 function setDataPerson(content, response, personData, type, fileErr) {
@@ -247,7 +249,6 @@ function finishItem(content, object, response, type, fileErr) {
 function finishDetailedItem(content, object, response, type, fileErr) {
     var pieces = content.split("$");
     var s = pieces[0]+object.title+pieces[1]+object.location+pieces[2]+object.description+pieces[3]+object.postedDate+pieces[4]+object.phone+pieces[5];
-    console.log(s);
     deliver(response, type, fileErr, s);
 }
 
