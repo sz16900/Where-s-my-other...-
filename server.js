@@ -20,7 +20,9 @@
 "use strict";
 
 var http = require("http");
-var fs = require("fs");
+var fs = require("fs-extra");
+var formidable = require('formidable');
+var util = require('util');
 var sql = require("sqlite3");
 var db = new sql.Database("data.db");
 db.loadExtension("./okapi_bm25.sqlext");
@@ -129,27 +131,67 @@ function handleAddItem(response, url) {
 // If there's too much data, kill the connection
 function handleSuccessItem(request, response, url) {
     var file = "./public" + url;
-    request.on('data', add);
-    request.on('end', end);
-    var body = "";
-    // var body;
-    function add(chunk) {
-      // console.log(chunk);
-      // console.log(typeof(chunk));
-      // body = body + chunk;
-        body = body + chunk.toString();
-        // What if someone puts a plus in there???!!
-        body = body.replace(/\+/g, " ");
-        console.log(body);
-    }
-    function end() {
-        body = decodeURIComponent(body);
-        body = body.slice(5);
-        var itemData = body.split("&name=");
-        var type = validate(file, response);
-        return specialSuccessItem(response, file, itemData, type);
-    }
+    var type = validate(file, response);
+    var form = new formidable.IncomingForm();
+    var picId = "";
+    form.parse(request, function(err, fields, files) {
+        console.log(util.inspect({fields: fields, files: files}));
+        // console.log("HERE: "+fields.email);
+        return specialSuccessItem(response, file, fields, type, picId);
+    });
+
+    // console.log(itemData);
+    form.on('progress', function(bytesReceived, bytesExpected) {
+        var percent_complete = (bytesReceived / bytesExpected) * 100;
+        console.log(percent_complete.toFixed(2));
+    });
+ 
+    form.on('error', function(err) {
+        console.error(err);
+    });
+
+    form.on('end', function(fields, files) {
+        /* Temporary location of our uploaded file */
+        var temp_path = this.openedFiles[0].path;
+        var p = temp_path.toString();
+        var p2 = p.split("upload_");
+        var picId = p2[1];
+        /* Location where we want to copy the uploaded file */
+        console.log("HEREEEEEEE: "+fields.name);
+        var new_location = './public/uploads/';
+
+        fs.copy(temp_path, new_location + picId, function(err) {
+            if (err) {
+                console.error(err);
+            } else {
+                console.log("success!")
+            }
+        });
+        return(picId);
+    });
 }
+
+    // request.on('data', add);
+    // request.on('end', end);
+    // var body = "";
+    // // var body;
+    // function add(chunk) {
+    //   // console.log(chunk);
+    //   // console.log(typeof(chunk));
+    //   // body = body + chunk;
+    //     body = body + chunk.toString();
+    //     // What if someone puts a plus in there???!!
+    //     body = body.replace(/\+/g, " ");
+    //     console.log(body);
+    // }
+    // function end() {
+    //     body = decodeURIComponent(body);
+    //     body = body.slice(5);
+    //     var itemData = body.split("&name=");
+    //     var type = validate(file, response);
+    //     return specialSuccessItem(response, file, itemData, type);
+    // }
+// }
 
 // Validates the url.
 function validate(url, response) {
@@ -172,9 +214,9 @@ function specialSuccessPerson(response, file, personData, type) {
     function ready(fileErr, content) { setDataPerson(content, response, personData, type, fileErr); }
 }
 
-function specialSuccessItem(response, file, itemData, type) {
+function specialSuccessItem(response, file, itemData, type, picId) {
     fs.readFile(file, ready);
-    function ready(fileErr, content) { checkEmailExists(itemData[0], content, response, itemData, type, fileErr); }
+    function ready(fileErr, content) { checkEmailExists(content, response, itemData, type, fileErr, picId); }
 }
 
 function specialDetailedItem(response, file, detailedItemId, type) {
@@ -214,22 +256,23 @@ function setDataPerson(content, response, personData, type, fileErr) {
 }
 
 // Checks that the user has entered a validate email address, then alls the set data.
-function checkEmailExists(email, content, response, itemData, type, fileErr) {
+function checkEmailExists(content, response, itemData, type, fileErr, picId) {
     var STMT = db.prepare("SELECT COUNT(id) AS exist FROM Person WHERE Person.email = ?");
-    STMT.get(email, ready);
+    STMT.get(itemData.email, ready);
     // Need to handle the fail where email does not exist in a dynamic way on page, currently crashes server.
     function ready(err, object) {
         if (object.exist == 1) {
-            setDataItem(content, response, itemData, type, fileErr);
+            setDataItem(content, response, itemData, type, fileErr, picId);
         } else return fail(response, NotFound, "Email not found");
     }
     STMT.finalize();
 }
 
 // Prepares insert statement for new item.
-function setDataItem(content, response, itemData, type, fileErr) {
+function setDataItem(content, response, itemData, type, fileErr, picId) {
+    console.log("HERE: "+picId);
     var STMT = db.prepare("INSERT INTO Item (personEmail, title, description, location, postedDate) VALUES (?, ?, ?, ?, datetime('now'))");
-    STMT.run(itemData[0], itemData[1], itemData[2], itemData[3], ready);
+    STMT.run(itemData.email, itemData.title, itemData.description, itemData.location, ready);
     function ready(err, object) { finishSetItem(content, object, response, type, fileErr); }
     STMT.finalize();
 }

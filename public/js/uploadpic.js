@@ -1,5 +1,11 @@
 // "use strict";
 //
+// function handleFileSelect(evt) {
+//    var files = evt.target.files;
+//
+//     document.getElementById('file-form').addEventListener('change', handleFileSelect, false);
+// }
+//
 // function sendPic() {
     //var getImage=document.getElementById("PostImage").value;
     // var fileSelect = document.getElementById("uploadPic");
@@ -34,45 +40,45 @@
     // q.send(file);
 // }
 
-
-var form = document.getElementById('file-form');
-var fileSelect = document.getElementById('file-select');
-var uploadButton = document.getElementById('upload-button');
-
-form.onsubmit = function(event) {
-  event.preventDefault();
-
-  // Update button text.
-  uploadButton.innerHTML = 'Uploading...';
-
-  // The rest of the code will go here...
-
-  // Get the selected files from the input.
-var files = fileSelect.files;
-
-var file = files[0];
-
-  // Check the file type.
-  // if (!file.type.match('image.*')) {
-  //   continue;
-  // }
-
-  // Add the file to the request.
-  formData.append('photos[]', file, file.name);
-  // Set up the request.
-var xhr = new XMLHttpRequest();
-xhr.open('POST', '/success-item.html', true);
-
-xhr.onload = function () {
-  if (xhr.status === 200) {
-    // File(s) uploaded.
-    uploadButton.innerHTML = 'Upload';
-  } else {
-    alert('An error occurred!');
-  }
-};
-
-// Send the Data.
-xhr.send(formData);
-
-}
+//
+// var form = document.getElementById('file-form');
+// var fileSelect = document.getElementById('file-select');
+// var uploadButton = document.getElementById('upload-button');
+//
+// form.onsubmit = function(event) {
+//   event.preventDefault();
+//
+//   // Update button text.
+//   uploadButton.innerHTML = 'Uploading...';
+//
+//   // The rest of the code will go here...
+//
+//   // Get the selected files from the input.
+// var files = fileSelect.files;
+//
+// var file = files[0];
+//
+//   // Check the file type.
+//   // if (!file.type.match('image.*')) {
+//   //   continue;
+//   // }
+//
+//   // Add the file to the request.
+//   formData.append('photos[]', file, file.name);
+//   // Set up the request.
+// var xhr = new XMLHttpRequest();
+// xhr.open('POST', '/success-item.html', true);
+//
+// xhr.onload = function () {
+//   if (xhr.status === 200) {
+//     // File(s) uploaded.
+//     uploadButton.innerHTML = 'Upload';
+//   } else {
+//     alert('An error occurred!');
+//   }
+// };
+//
+// // Send the Data.
+// xhr.send(formData);
+//
+// }
