@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css"/>
     <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="../img/fresh_air_logo_icon.png"/>
+    <script src="/js/validate-form.js"></script>
     <title>Item</title>
 </head>
 <body>
@@ -25,21 +26,12 @@
 		</nav>
 	</header>
 
-<div id="createForm">
-  <form method="post" action="/success-person.html">
-      <p><label>name
-          <input type="text" name="name" placeholder="name"/>
-      </label>
-      </p>
-      <p><label>email
-          <input type="text" name="name" placeholder="email"/>
-      </label>
-      </p>
-      <p><label>phone
-          <input type="text" name="name" placeholder="phone"/>
-      </label>
-      </p>
-      <input type="submit" value="Submit"/>
+<div class="form-styling" id="createForm">
+  <form name="myForm" method="post" action="/success-person.html" onsubmit="return validateForm(document.myForm)">
+    <input type="text" name="name" placeholder="name" />
+    <input type="text" name="name" placeholder="email" />
+    <input type="text" name="name" placeholder="phone" />
+    <input type="submit" value="Submit" />
   </form>
 </div>
 
