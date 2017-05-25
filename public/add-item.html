@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css"/>
     <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="../img/fresh_air_logo_icon.png"/>
+    <script src="/js/validate-form.js"></script>
     <title>Item</title>
 </head>
 <body>
@@ -26,37 +27,16 @@
 		</nav>
 	</header>
 
-<div id="createForm">
-  <form method="post" action="/success-item.html" enctype="multipart/form-data" id="itemForm">
-      <p><label>email
-          <input type="text" name="email" placeholder="email"/>
-      </label>
-      </p>
-      <p><label>title
-          <input type="text" name="title" placeholder="title"/>
-      </label>
-      </p>
-      <p><label>description
-          <input type="text" name="description" placeholder="description"/>
-      </label>
-      </p>
-      <p><label>postcode
-          <input type="text" name="location" placeholder="postcode"/>
-      </label>
-      </p>
-      <p><label>Add a picture
-          <input type="file" name="upload"/>
-      </label>
-      </p>
-      <input type="submit" value="Submit"/>
+<div class="form-styling" id="createForm">
+
+  <form name="myForm" method="post" action="/success-item.html" enctype="multipart/form-data" id="itemForm" onsubmit="return validateForm(document.myForm)">
+    <input type="text" name="email" placeholder="email" />
+    <input type="text" name="title" placeholder="title" />
+    <input type="text" name="description" placeholder="description" />
+    <input type="text" name="location" placeholder="postcode" />
+    <input type="file" name="upload"/>
+    <input type="submit" value="Submit"/>
   </form>
-
-  <!-- <div id="createForm">
-
-  <form id="file-form" action="/success-item.html" enctype="multipart/form-data" method="POST">
-  <input type="file" name="upload"/>
-  <button type="submit" id="upload-button">Upload</button>
-  </form> -->
 
 </div>
 

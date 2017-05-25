@@ -174,8 +174,9 @@ li {
 
 #createForm{
 	width: 100%;
-	background-color: #F0F0D8;	color: #333333;
-	/*height: 300px;*/
+	/*background-color: #F0F0D8;	*/
+	color: #333333;
+	height: 300px;
 	margin: 0 auto;
 	overflow: hidden;
 	padding: 200px 0;
@@ -206,7 +207,57 @@ li {
       width:100%;
 }
 
- /*Condense the navigation menu and turn off paralaxing if needed. */
+/*Form styling*/
+
+.form-styling {
+    font: 95% Arial, Helvetica, sans-serif;
+    max-width: 400px;
+    margin: 10px auto;
+    padding: 16px;
+}
+
+.form-styling input[type="text"],
+.form-styling textarea,
+.form-styling select {
+    outline: none;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    width: 100%;
+    background: #fff;
+    margin-bottom: 4%;
+    border: 1px solid #ccc;
+    padding: 3%;
+    color: #555;
+    font: 95% Arial, Helvetica, sans-serif;
+}
+.form-styling input[type="text"]:focus,
+.form-styling textarea:focus,
+.form-styling select:focus {
+    box-shadow: 0 0 5px #43D1AF;
+    padding: 3%;
+    border: 1px solid #43D1AF;
+}
+
+.form-styling input[type="submit"] {
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    width: 100%;
+    padding: 3%;
+    background: #43D1AF;
+    border-bottom: 2px solid #30C29E;
+    border-top-style: none;
+    border-right-style: none;
+    border-left-style: none;
+    color: #fff;
+}
+
+.form-styling input[type="submit"]:hover {
+    background: #2EBC99;
+}
+
+/* Condense the navigation menu and turn off paralaxing if needed. */
 @media only screen and (max-device-width: 1024px) {
 
 header {
@@ -236,7 +287,7 @@ header {
 	}
 
 	nav li {
-		text-align: center;l
+		text-align: center;
 		width: 100%;
 		padding: 10px 0;
 		margin: 0;
