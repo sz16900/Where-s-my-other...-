@@ -52,7 +52,7 @@ function handle(request, response) {
     if (url.startsWith("/success-item")) handleSuccessItem(request, response, url);
     if (url.startsWith("/detailed-item")) detailedItem(request, response, url);
     if (url.endsWith("/")) handleIndex(response, url);
-    if (url.startsWith("/css") || url.startsWith("/img") || url.startsWith("/js")) handleResources(response, url);
+    if (url.startsWith("/css") || url.startsWith("/img") || url.startsWith("/js") || url.startsWith("/uploads")) handleResources(response, url);
 }
 
 function detailedItem(request, response, url) {
@@ -80,7 +80,6 @@ function handleIndex(response, url) {
     fs.readFile(file, ready);
     function ready(err, content) { deliver(response, type, err, content); }
 }
-
 
 // Handles the Item page - on Item ID search.
 function handleItem(response, url) {
@@ -145,6 +144,16 @@ function handleSuccessItem(request, response, url) {
         var p2 = p.split("upload_");
         picId = p2[1];
         itemData = fields;
+        var imgType = validate(files.upload.name);
+        if (imgType.includes("image")) {
+            var slash = imgType.lastIndexOf("/");
+            var extension = ("."+imgType.substring(slash+1));
+            picId += extension;
+            console.log(picId);
+        }
+        else {
+            console.log("Picture must be png, gif, jpeg, jpg, svg");
+        }
     });
 
     form.on('progress', function(bytesReceived, bytesExpected) {
@@ -215,7 +224,7 @@ function getDataItem(content, response, searchTitle, type, fileErr) {
 
 // Shouldnt be joining on email because we dont know if they changed their email
 function getDetailedDataItem(content, response, detailedItemId, type, fileErr) {
-    var STMT = db.prepare("SELECT Item.title, Item.location, Item.description, Item.postedDate, Person.phone FROM Item Join Person ON Item.personEmail = Person.email WHERE Item.id = ?");
+    var STMT = db.prepare("SELECT Item.title, Item.location, Item.description, Item.postedDate, Item.pictureId, Person.phone FROM Item Join Person ON Item.personEmail = Person.email WHERE Item.id = ?");
     STMT.get(detailedItemId, ready);
     function ready(err, object) {
         finishDetailedItem(content, object, response, type, fileErr); }
@@ -256,13 +265,16 @@ function setDataItem(content, response, itemData, type, fileErr, picId) {
 }
 
 // Delivers Item page by splitting content and adding object data.
+// If img is deleted from file there needs to be a check to replace with no image found.
 function finishItem(content, object, response, type, fileErr) {
     var header = content.split("<!-- {list} -->");
     var s = "";
+    var imgURL = "/uploads/";
     for (var i = 0; i < object.length; i++) {
-    console.log(object[i].pictureId);
-    var pieces = header[1].split("$");
-    s += pieces[0]+object[i].id+pieces[1]+object[i].title+pieces[2]+object[i].location+pieces[3]+object[i].description+pieces[4]+object[i].postedDate+pieces[5];
+        var img = imgURL + object[i].pictureId;
+        console.log(img);
+        var pieces = header[1].split("$");
+        s += pieces[0]+object[i].id+pieces[1]+img+pieces[2]+object[i].title+pieces[3]+object[i].location+pieces[4]+object[i].description+pieces[5]+object[i].postedDate+pieces[6];
     }
     s = header[0]+s+header[2];
     deliver(response, type, fileErr, s);
@@ -270,7 +282,10 @@ function finishItem(content, object, response, type, fileErr) {
 
 function finishDetailedItem(content, object, response, type, fileErr) {
     var pieces = content.split("$");
-    var s = pieces[0]+object.title+pieces[1]+object.location+pieces[2]+object.description+pieces[3]+object.postedDate+pieces[4]+object.phone+pieces[5];
+    var imgURL = "/uploads/";
+    var img = imgURL + object.pictureId;
+    console.log(object.pictureId);
+    var s = pieces[0]+img+pieces[1]+object.title+pieces[2]+object.location+pieces[3]+object.description+pieces[4]+object.postedDate+pieces[5]+object.phone+pieces[6];
     deliver(response, type, fileErr, s);
 }
 

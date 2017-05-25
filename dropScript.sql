@@ -24,11 +24,11 @@ CREATE TABLE Item (
 INSERT INTO Person (name, email, phone) VALUES ("rob", "rr@gmail.com", 999999);
 INSERT INTO Person (name, email, phone) VALUES ("seth", "sz@gmail.com", 888888);
 
-INSERT INTO Item (personEmail, title, description, postedDate, location) VALUES ("rr@gmail.com", "Shoe Black", "A black nike shoe, right, size 9", datetime('now'), "BS28UN");
-INSERT INTO Item (personEmail, title, description, postedDate, location) VALUES ("rr@gmail.com", "Shoe Orange", "An orange nike shoe, left, size 9", datetime('now'), "BS28UN");
-INSERT INTO Item (personEmail, title, description, postedDate, location) VALUES ("rr@gmail.com", "Shoe Pink", "A pink nike shoe, right, size 9", datetime('now'), "BS28UN");
-INSERT INTO Item (personEmail, title, description, postedDate, location) VALUES ("rr@gmail.com", "Shoe White", "A white nike shoe, left, size 9", datetime('now'), "BS28UN");
-INSERT INTO Item (personEmail, title, description, postedDate, location) VALUES ("sz@gmail.com", "Mitten", "A red mitten for the right hand", datetime('now'), "BS28UN");
+INSERT INTO Item (personEmail, title, description, postedDate, location, pictureId) VALUES ("rr@gmail.com", "Shoe Black", "A black nike shoe, right, size 9", datetime('now'), "BS28UN", "no-image-found.jpg");
+INSERT INTO Item (personEmail, title, description, postedDate, location, pictureId) VALUES ("rr@gmail.com", "Shoe Orange", "An orange nike shoe, left, size 9", datetime('now'), "BS28UN", "no-image-found.jpg");
+INSERT INTO Item (personEmail, title, description, postedDate, location, pictureId) VALUES ("rr@gmail.com", "Shoe Pink", "A pink nike shoe, right, size 9", datetime('now'), "BS28UN", "no-image-found.jpg");
+INSERT INTO Item (personEmail, title, description, postedDate, location, pictureId) VALUES ("rr@gmail.com", "Shoe White", "A white nike shoe, left, size 9", datetime('now'), "BS28UN", "no-image-found.jpg");
+INSERT INTO Item (personEmail, title, description, postedDate, location, pictureId) VALUES ("sz@gmail.com", "Mitten", "A red mitten for the right hand", datetime('now'), "BS28UN", "no-image-found.jpg");
 
 CREATE VIRTUAL TABLE ItemSearch USING fts4 (id, title, description, postedDate, location, pictureId);
 

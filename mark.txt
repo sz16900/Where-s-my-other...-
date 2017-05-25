@@ -1,7 +1,7 @@
 <ul>
-<li>B for HTML</li>
-<li>B for CSS</li>
-<li>X for JS</li>
+<li>A for HTML</li>
+<li>A for CSS</li>
+<li>C for JS</li>
 <li>A for PNG</li>
 <li>X for SVG</li>
 <li>A for Server</li>

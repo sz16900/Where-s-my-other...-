@@ -4,7 +4,7 @@ body{
 	margin: 0;
 	padding: 0;
 	width: 100%;
-	background-color: #F0F0D8;
+	background-color: #CECECE;
 }
 h1 {
 	font-family:"Pacifico";
@@ -17,9 +17,9 @@ h1 {
 }
 h2 {
 	font-family:"Raleway";
-	font-weight: normal;
-	font-size: 40px;
-	text-align: center;
+	font-weight: bold;
+	font-size: 2em;
+	text-align: left;
 	color: #fff;
 	margin: 0;
 	padding: 0;
@@ -121,7 +121,7 @@ li {
 /*Should it be fluid? */
 #search{
 	width: 100%;
-	background-color: #F0F0D8;	color: #333333;
+	background-color: #CECECE;	color: #333333;
 	/*height: 300px;*/
 	margin: 0 auto;
 	overflow: hidden;
@@ -129,17 +129,47 @@ li {
 	text-align: center;
 }
 
-.itemContainer{
-	background-clip:content-box;
-	padding-left: 50px;
-	padding-right: 50px;
-	background-color: #FCFBE3;
+.item-list{
+    width: 50%;
+    margin-left: 200px;
+    margin-right: 200px;
+    margin-bottom: 70px;
+}
+
+.item-container{
+    margin: 20px 20px 20px 20px;
+    overflow: auto;
+	background-color: #666666;
 	/*border: 1px solid #CDD7B6;*/
+}
+
+.item-content{
+    margin-left: 210px;
 }
 
 .item{
 	padding-left: 25px;
 	color: #77CCA4;
+}
+
+.listing-thumbnail{
+    width: 200px;
+    height: 200px;
+    float: left;
+}
+
+.listing-thumbnail img{
+    display: block;
+}
+
+.detailed-thumbnail{
+    width: 300px;
+    height: 300px;
+    float: left;
+}
+
+.detailed-thumbnail img{
+    display: block;
 }
 
 #createForm{
@@ -160,32 +190,20 @@ li {
   font-family:"Raleway";
 }
 
-input[type=text] {
-    width: 130px;
-    -webkit-transition: width 0.4s ease-in-out;
-    transition: width 0.4s ease-in-out;
-}
-
-/* When the input field gets focus, change its width to 100% */
-input[type=text]:focus {
-    width: 25%;
-}
-
 /*what is this doing*/
 .site-footer, .page-wrap:after {
   height: 60px;
 }
 
 .site-footer {
-  background: #fff;
-  box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.2);
-  border-top: 1px solid #4C9CF1;
-	position:fixed;
-	left:0px;
-  bottom:0px;
-  height:60px;
-  width:100%;
-  /*background:#999;*/
+      background: #fff;
+      box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.2);
+      border-top: 1px solid #4C9CF1;
+    	position:fixed;
+    	left:0px;
+      bottom:0px;
+      height:60px;
+      width:100%;
 }
 
  /*Condense the navigation menu and turn off paralaxing if needed. */
@@ -194,6 +212,12 @@ input[type=text]:focus {
 header {
 	position: absolute;
 }
+
+.item-list{
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
 
 	#menu-icon {
 		display:inline-block;
