@@ -1,7 +1,6 @@
 DROP TABLE IF EXISTS Person;
 DROP TABLE IF EXISTS Item;
 DROP TABLE IF EXISTS ItemSearch;
-DROP TABLE IF EXISTS Picture;
 
 CREATE TABLE Person (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,14 +16,10 @@ CREATE TABLE Item (
   description TEXT NOT NULL,
   postedDate TEXT NOT NULL,
   location VARCHAR(10),
-  itemPicture INTEGER,
-  CONSTRAINT itemPicture_Constraint FOREIGN KEY (itemPicture) REFERENCES Picture(id),
+  pictureId VARCHAR(100),
   CONSTRAINT personEmail_Constraint FOREIGN KEY (personEmail) REFERENCES Person(email)
 );
 
-CREATE TABLE Picture (
-   pictureId INTEGER PRIMARY KEY AUTOINCREMENT
-);
 
 INSERT INTO Person (name, email, phone) VALUES ("rob", "rr@gmail.com", 999999);
 INSERT INTO Person (name, email, phone) VALUES ("seth", "sz@gmail.com", 888888);

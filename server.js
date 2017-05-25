@@ -134,32 +134,29 @@ function handleSuccessItem(request, response, url) {
     var type = validate(file, response);
     var form = new formidable.IncomingForm();
     var picId = "";
+    var temp_path;
+    var new_location = './public/uploads/';
+    var itemData;
+
     form.parse(request, function(err, fields, files) {
         console.log(util.inspect({fields: fields, files: files}));
-        // console.log("HERE: "+fields.email);
-        return specialSuccessItem(response, file, fields, type, picId);
+        temp_path = files.upload.path;
+        var p = temp_path.toString();
+        var p2 = p.split("upload_");
+        picId = p2[1];
+        itemData = fields;
     });
 
-    // console.log(itemData);
     form.on('progress', function(bytesReceived, bytesExpected) {
         var percent_complete = (bytesReceived / bytesExpected) * 100;
         console.log(percent_complete.toFixed(2));
     });
- 
+
     form.on('error', function(err) {
         console.error(err);
     });
 
-    form.on('end', function(fields, files) {
-        /* Temporary location of our uploaded file */
-        var temp_path = this.openedFiles[0].path;
-        var p = temp_path.toString();
-        var p2 = p.split("upload_");
-        var picId = p2[1];
-        /* Location where we want to copy the uploaded file */
-        console.log("HEREEEEEEE: "+fields.name);
-        var new_location = './public/uploads/';
-
+    form.on('end', function(files) {
         fs.copy(temp_path, new_location + picId, function(err) {
             if (err) {
                 console.error(err);
@@ -167,31 +164,9 @@ function handleSuccessItem(request, response, url) {
                 console.log("success!")
             }
         });
-        return(picId);
+        return specialSuccessItem(response, file, itemData, type, picId);
     });
 }
-
-    // request.on('data', add);
-    // request.on('end', end);
-    // var body = "";
-    // // var body;
-    // function add(chunk) {
-    //   // console.log(chunk);
-    //   // console.log(typeof(chunk));
-    //   // body = body + chunk;
-    //     body = body + chunk.toString();
-    //     // What if someone puts a plus in there???!!
-    //     body = body.replace(/\+/g, " ");
-    //     console.log(body);
-    // }
-    // function end() {
-    //     body = decodeURIComponent(body);
-    //     body = body.slice(5);
-    //     var itemData = body.split("&name=");
-    //     var type = validate(file, response);
-    //     return specialSuccessItem(response, file, itemData, type);
-    // }
-// }
 
 // Validates the url.
 function validate(url, response) {
@@ -270,11 +245,14 @@ function checkEmailExists(content, response, itemData, type, fileErr, picId) {
 
 // Prepares insert statement for new item.
 function setDataItem(content, response, itemData, type, fileErr, picId) {
-    console.log("HERE: "+picId);
-    var STMT = db.prepare("INSERT INTO Item (personEmail, title, description, location, postedDate) VALUES (?, ?, ?, ?, datetime('now'))");
-    STMT.run(itemData.email, itemData.title, itemData.description, itemData.location, ready);
+    var STMT = db.prepare("INSERT INTO Item (personEmail, title, description, location, postedDate, pictureId) VALUES (?, ?, ?, ?, datetime('now'), ?)");
+    STMT.run(itemData.email, itemData.title, itemData.description, itemData.location, picId, ready);
     function ready(err, object) { finishSetItem(content, object, response, type, fileErr); }
     STMT.finalize();
+    
+    var UPDATE = db.prepare("INSERT INTO ItemSearch SELECT id, title, description, postedDate, location FROM Item WHERE Item.pictureId = ?");
+    UPDATE.run(picId);
+    UPDATE.finalize();
 }
 
 // Delivers Item page by splitting content and adding object data.
