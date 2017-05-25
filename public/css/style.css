@@ -199,6 +199,23 @@ li {
   font-family:"Raleway";
 }
 
+#chatBox {
+	position:absolute;
+	left:0px;
+	top:0px;
+}
+
+#pic1 {
+	width:100px;
+	height:100px;
+	display:none;
+}
+#pic2 {
+	width:100px;
+	height:100px;
+	display:none;
+}
+
 /*what is this doing*/
 .site-footer, .page-wrap:after {
   height: 60px;
@@ -275,7 +292,7 @@ header {
 .item-list{
     margin-left: 0px;
     margin-right: 0px;
-		
+
 }
 
 
