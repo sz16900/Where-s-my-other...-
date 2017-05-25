@@ -249,17 +249,18 @@ function setDataItem(content, response, itemData, type, fileErr, picId) {
     STMT.run(itemData.email, itemData.title, itemData.description, itemData.location, picId, ready);
     function ready(err, object) { finishSetItem(content, object, response, type, fileErr); }
     STMT.finalize();
-    
-    var UPDATE = db.prepare("INSERT INTO ItemSearch SELECT id, title, description, postedDate, location FROM Item WHERE Item.pictureId = ?");
+    // Updates the virtual table with new entry - for search.
+    var UPDATE = db.prepare("INSERT INTO ItemSearch SELECT id, title, description, postedDate, location, pictureId FROM Item WHERE Item.pictureId = ?");
     UPDATE.run(picId);
     UPDATE.finalize();
 }
 
 // Delivers Item page by splitting content and adding object data.
 function finishItem(content, object, response, type, fileErr) {
-  var header = content.split("<!-- {list} -->");
-  var s = "";
+    var header = content.split("<!-- {list} -->");
+    var s = "";
     for (var i = 0; i < object.length; i++) {
+    console.log(object[i].pictureId);
     var pieces = header[1].split("$");
     s += pieces[0]+object[i].id+pieces[1]+object[i].title+pieces[2]+object[i].location+pieces[3]+object[i].description+pieces[4]+object[i].postedDate+pieces[5];
     }

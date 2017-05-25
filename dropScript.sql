@@ -30,6 +30,6 @@ INSERT INTO Item (personEmail, title, description, postedDate, location) VALUES 
 INSERT INTO Item (personEmail, title, description, postedDate, location) VALUES ("rr@gmail.com", "Shoe White", "A white nike shoe, left, size 9", datetime('now'), "BS28UN");
 INSERT INTO Item (personEmail, title, description, postedDate, location) VALUES ("sz@gmail.com", "Mitten", "A red mitten for the right hand", datetime('now'), "BS28UN");
 
-CREATE VIRTUAL TABLE ItemSearch USING fts4 (id, title, description, postedDate, location);
+CREATE VIRTUAL TABLE ItemSearch USING fts4 (id, title, description, postedDate, location, pictureId);
 
-INSERT INTO ItemSearch SELECT id, title, description, postedDate, location FROM Item;
+INSERT INTO ItemSearch SELECT id, title, description, postedDate, location, pictureId FROM Item;
