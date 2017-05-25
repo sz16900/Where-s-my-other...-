@@ -12,11 +12,6 @@
 // Start the server: change the port to the default 80, if there are no
 // privilege issues and port number 80 isn't already in use.
 
-// TO DO:
-    // Check if person's email exists
-    // Is the Virtual Table updated??
-    // Sort by relevance optimized
-
 "use strict";
 
 var http = require("http");

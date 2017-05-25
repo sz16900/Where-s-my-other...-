@@ -1,5 +1,5 @@
 function validateForm(form) {
-    // loop through the inputs, checking for status
+    // loop through the inputs, checking for status 
     var inputs = form.getElementsByTagName('input');
     for (var i = 0; i < inputs.length; i++) {
         // make sure things are ok

@@ -139,9 +139,10 @@ li {
 .item-container{
     margin: 20px 20px 20px 20px;
     overflow: auto;
-	background-color: #666666;
-	/*border: 1px solid #CDD7B6;*/
+		background-color: #666666;
 }
+
+.item-container:hover {background: #30C29E;}
 
 .item-content{
     margin-left: 210px;
@@ -172,13 +173,20 @@ li {
     display: block;
 }
 
+.imageDrop {
+	position: absolute;
+	top: 100px;
+	left: 1000px;
+	z-index: 5;
+	height: 50px;
+  width: 50px;
+}
+
 #createForm{
 	width: 100%;
-	/*background-color: #F0F0D8;	*/
 	color: #333333;
 	height: 300px;
 	margin: 0 auto;
-	overflow: hidden;
 	padding: 200px 0;
 	text-align: center;
 }
@@ -267,6 +275,7 @@ header {
 .item-list{
     margin-left: 0px;
     margin-right: 0px;
+		
 }
 
 
