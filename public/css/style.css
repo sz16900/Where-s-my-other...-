@@ -6,12 +6,17 @@ body{
 	width: 100%;
 	background-color: #CECECE;
 }
+
+p {
+    font-family:"Raleway";
+}
+
 h1 {
 	font-family:"Pacifico";
 	font-weight:normal;
 	font-size: 40px;
 	text-align: center;
-	color: #4C9CF1;
+	color: #30C29E;
 	margin: 0;
 	padding: 0;
 }
@@ -39,7 +44,7 @@ h3 {
 .clear { clear: both; }
 
 a {
-	color: #4C9CF1;
+	color: #30C29E;
 	text-decoration: none;
 	font-weight: bold;
 }
@@ -58,8 +63,8 @@ header {
 	height: 76px;
 	top: 0;
 	left: 0;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-	border-bottom: 1px solid #4C9CF1;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+	border-bottom: 1px solid #30C29E;
 }
 
 #logo {
@@ -108,16 +113,6 @@ li {
 	padding: 10px
 }
 
-.quotes {
-	font-family: 'Raleway', serif;
-	font-weight: normal;
-	font-size: 30px;
-	text-align: left;
-	margin: 50px auto;
-}
-
-.quotes_container { width: 800px; margin: 0 auto; }
-
 /*Should it be fluid? */
 #search{
 	width: 100%;
@@ -130,16 +125,20 @@ li {
 }
 
 .item-list{
-    width: 50%;
-    margin-left: 200px;
-    margin-right: 200px;
-    margin-bottom: 70px;
+    margin: auto;
+    width: 50%
 }
 
 .item-container{
     margin: 20px 20px 20px 20px;
     overflow: auto;
-		background-color: #666666;
+	background-color: #666666;
+}
+
+.item-container-page{
+    margin: 20px 20px 20px 20px;
+    overflow: auto;
+	background-color: #666666;
 }
 
 .item-container:hover {background: #30C29E;}
@@ -179,7 +178,17 @@ li {
 	left: 1000px;
 	z-index: 5;
 	height: 50px;
-  width: 50px;
+    width: 50px;
+}
+
+.item-heading {
+    padding-left: 350px;
+    padding-top: 10px;
+    padding-right: 30px;
+}
+
+.item-body {
+    padding-left: 350px;
 }
 
 #createForm{
@@ -216,6 +225,16 @@ li {
 	display:none;
 }
 
+.svg-footer {
+     position: fixed;
+     bottom: 0px;
+     width: 100%;
+}
+
+.house:hover {
+    fill: #CE5BD9;
+}
+
 /*what is this doing*/
 .site-footer, .page-wrap:after {
   height: 60px;
@@ -224,7 +243,7 @@ li {
 .site-footer {
       background: #fff;
       box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.2);
-      border-top: 1px solid #4C9CF1;
+      border-top: 1px solid #30C29E;
     	position:fixed;
     	left:0px;
       bottom:0px;
@@ -290,9 +309,8 @@ header {
 }
 
 .item-list{
-    margin-left: 0px;
-    margin-right: 0px;
-
+    margin-top: 100px;
+    width: 100%
 }
 
 
