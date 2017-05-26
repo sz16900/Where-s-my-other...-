@@ -18,4 +18,4 @@ function flipImage() {
 }
 
 //call same function again for x ammount of seconds
-setInterval(flipImage, 1000);
+setInterval(flipImage, 2000);

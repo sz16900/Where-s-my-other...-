@@ -209,27 +209,28 @@ li {
 }
 
 #chatBox {
-	position:absolute;
-	left:0px;
-	top:0px;
+	position:fixed;
+	left:800px;
+	top:100px;
 }
 
 #pic1 {
-	width:100px;
-	height:100px;
+	width: auto;
+	height: auto;;
 	display:none;
 }
 #pic2 {
-	width:100px;
-	height:100px;
+	width: auto;
+	height: auto;
 	display:none;
 }
 
-.svg-footer {
+#svg-footer {
      position: fixed;
      bottom: 0px;
      width: 100%;
-}
+		 z-index: -2;
+	 }
 
 .house:hover {
     fill: #CE5BD9;
@@ -339,6 +340,12 @@ header {
 
 	nav:hover ul {
 		display: block;
+	}
+
+	#chatBox {
+		position:fixed;
+		left:450px;
+		top:1000px;
 	}
 
 }
